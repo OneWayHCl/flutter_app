@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_boost/flutter_boost.dart';
+import 'package:my_flutter/pages/service_data.dart';
 
 class ServicePage extends StatefulWidget {
   final String data;
@@ -12,6 +15,17 @@ class ServicePage extends StatefulWidget {
 }
 
 class _ServicePageState extends State<ServicePage> {
+  var dataList = brands;
+
+  void onTapActionWithIndex(int index) {
+    print('onTapActionWithIndex--${index}');
+    setState(() {
+      for (var element in dataList) {
+        element.selected = false;
+      }
+      dataList[index].selected = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,52 +37,23 @@ class _ServicePageState extends State<ServicePage> {
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            SingleChildScrollView( scrollDirection: Axis.horizontal,child: Container(
+            Container(
               height: 40,
-              color: Colors.yellow,
-              padding: EdgeInsets.fromLTRB(24, 0, 0, 0),
-              child: Row(
-
-              children: [
-                // Flexible(child: child)
-                Container(
-                  color: Colors.orange,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Column(
-                  children: [
-                    Container(child: Text('OPPO', style: TextStyle(fontSize: 14)),height: 38,),
-                    Container(height: 2, width: 4, margin: EdgeInsets.only(left: 10, right: 10), color: Colors.black,)
-                  ],
-                ),
-                  )
-                ),
-                Container(
-                  width: 280,
-                  child: Column(
-                  children: [
-                    Container(child: TextButton(
-                  child: Text('OnePlus', style: TextStyle(fontSize: 14)),
-                  onPressed: () {},
-                ),height: 38,),
-                  Container(height: 2, width: double.infinity, margin: EdgeInsets.only(left: 10, right: 10), color: Colors.black,)
-                  ],
-                ),
-                ),Container(
-                  width: 190,
-                  child: Column(
-                  children: [
-                    Container(child: TextButton(
-                  child: Text('第三方商品', style: TextStyle(fontSize: 14)),
-                  onPressed: () {},
-                ),height: 38,),
-                  Container(height: 2, width: double.infinity, margin: EdgeInsets.only(left: 10, right: 10), color: Colors.black,)
-                  ],
-                ),
-                ),
-              ],
-            ),),),
-            
+              child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  padding: EdgeInsets.only(left: 20),
+                  children: List.generate(
+                      dataList.length,
+                      (index) => ServiceTabItemCell(
+                            title: dataList[index].title,
+                            selected: dataList[index].selected,
+                            onTapAction: (){
+                              onTapActionWithIndex(index);
+                            },
+                          ))),
+            ),
             const Align(
                 alignment: Alignment.center,
                 child: Text("Simple flutter page",
@@ -79,14 +64,12 @@ class _ServicePageState extends State<ServicePage> {
                 child: Text("data:${widget.data}",
                     style: const TextStyle(fontSize: 26))),
             const SizedBox(height: 50),
-
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: CupertinoButton.filled(
                 padding:
                     const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
-                onPressed: () {
-                },
+                onPressed: () {},
                 child: const Text('pop and return data',
                     style: TextStyle(
                         fontSize: 20,
@@ -97,6 +80,72 @@ class _ServicePageState extends State<ServicePage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ServiceTabItemCell extends StatefulWidget {
+  final String title;
+  final bool selected;
+  final Function onTapAction;
+
+  const ServiceTabItemCell({Key key, this.title, this.selected, this.onTapAction})
+      : super(key: key);
+
+  @override
+  _ServiceTabItemCellState createState() => _ServiceTabItemCellState();
+}
+
+class _ServiceTabItemCellState extends State<ServiceTabItemCell> {
+  double textWidth(
+      {String text,
+      TextStyle style,
+      int maxLines = 2 ^ 31,
+      double maxWidth = double.infinity}) {
+    text = widget.title;
+    if (text == null || text.isEmpty) {
+      return 0.0;
+    }
+    if (style == null) {
+      style = TextStyle(fontSize: 14);
+    }
+    final TextPainter textPainter = TextPainter(
+        textDirection: TextDirection.ltr,
+        text: TextSpan(text: text, style: style),
+        maxLines: maxLines)
+      ..layout(maxWidth: maxWidth);
+    return textPainter.size.width;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      child: Container(
+          height: 40,
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: Align(
+            alignment: Alignment.center,
+            child: Column(
+              children: [
+                Container(
+                  height: 38,
+                  width: textWidth(),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(widget.title),
+                  ),
+                ),
+                Container(
+                  height: 2,
+                  padding: EdgeInsets.only(left: 2, right: 2),
+                  width: textWidth() - 4,
+                  color:
+                      widget.selected == true ? Colors.black : Colors.transparent,
+                )
+              ],
+            ),
+          )),
+      onTap: widget.onTapAction,
     );
   }
 }
